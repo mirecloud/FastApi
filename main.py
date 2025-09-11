@@ -15,12 +15,17 @@ class Post(BaseModel):
 def read_root():
     return {"Hello": "World"}
 
+@app.get("/posts")
+def get_posts():
+    return {"Hello": "Tis is your post data"}
 
-@app.post("/createposts")
+
+@app.post("/posts")
 #def create_posts(payload: dict = Body(...) ):
-def create_posts(new_post: Post):
+def create_posts(post: Post):
 
     #print(payload)
-    print(new_post)
+    print(post)
+    print(post.dict())
     #return {"new_post": f"title {payload['title']}  content: {payload['content']}"}
-    return {"data": "new_post"}
+    return {"data": post}
