@@ -59,6 +59,18 @@ helm upgrade --install postgres postgres/postgresql -n postgres   --create-names
 > For persistence, enable PVC with:  
 > `--set primary.persistence.enabled=true`
 
+3. **Verify PostgreSQL is running on Kubernetes:**
+```bash
+kubectl -n postgres get all
+```
+Example output:
+```
+pod/postgres-0   1/1   Running   2 (18m ago)   17h
+service/postgres            ClusterIP      10.106.28.225   <none>         5432/TCP
+service/postgres-lb         LoadBalancer   10.104.52.111   192.168.52.1   5432:32168/TCP
+statefulset.apps/postgres   1/1   47h
+```
+
 ## 📊 Deploy pgAdmin4
 1. **Create namespace:**
 ```bash
@@ -72,7 +84,12 @@ kubectl apply -f pgadmin.yaml
 
 3. **Check if the Pod is running:**
 ```bash
-kubectl get pods -n pgadmin
+kubectl -n pgadmin get all
+```
+Example output:
+```
+pod/pgadmin   1/1   Running   2 (5h19m ago)   23h
+service/pgadmin   LoadBalancer   10.99.142.191   192.168.52.2   80:31369/TCP
 ```
 
 4. **Access pgAdmin via port-forward:**
@@ -83,6 +100,9 @@ kubectl port-forward -n pgadmin pod/pgadmin 8080:80
 👉 Open [http://localhost:8080](http://localhost:8080)  
 - **Email:** `info@mirecloud.com`  
 - **Password:** `admin`
+
+Or directly access it via LoadBalancer IP:  
+👉 [http://192.168.52.2](http://192.168.52.2)
 
 ## 🔗 FastAPI Endpoints
 ### Create a post
