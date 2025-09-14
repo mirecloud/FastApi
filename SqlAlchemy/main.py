@@ -3,7 +3,7 @@ from typing import List
 from sqlmodel import Session, select
 
 from database import get_session
-from models import Post
+from models import Post, PostRead
 
 app = FastAPI()
 
@@ -14,8 +14,9 @@ def create_post(post: Post, session: Session = Depends(get_session)):
     session.refresh(post)
     return post
 
-@app.get("/posts/", response_model=List[Post], status_code=200)
+@app.get("/posts/", response_model=List[PostRead], status_code=200)
 def get_posts(session: Session = Depends(get_session)):
+    #posts = session.exec(select(PostRead)).all()
     posts = session.exec(select(Post)).all()
     return posts
 

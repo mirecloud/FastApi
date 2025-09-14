@@ -10,4 +10,10 @@ class Post(SQLModel, table=True):
     content: str
     published: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+
+class PostRead(SQLModel):
+    title: str
+    content: str
+    published: bool
+
  
