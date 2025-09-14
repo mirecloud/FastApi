@@ -11,10 +11,6 @@ class Post(SQLModel, table=True):
     published: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-class PostRead(SQLModel):
-    title: str
-    content: str
-    published: bool
 
 class User(SQLModel, table=True):
 
