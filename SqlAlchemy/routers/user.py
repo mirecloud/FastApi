@@ -7,7 +7,11 @@ from database import get_session
 from models import User
 from schemas import UserCreate, UserRead
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/users",
+    tags=["Users"],
+    responses={404: {"description": "Not found"}},  
+)
 
 from passlib.context import CryptContext
 
@@ -27,12 +31,12 @@ def create_users(user: UserCreate, session: Session = Depends(get_session)):
         raise HTTPException(status_code=400, detail="Email already registered")
     return user    
 
-@router.get("/users/", response_model=List[UserRead], status_code=200)
+@router.get("/", response_model=List[UserRead], status_code=200)
 def get_users(session: Session = Depends(get_session)):
     users = session.exec(select(User)).all()
     return users
 
-@router.get("/users/{user_id}", response_model=UserRead)
+@router.get("/{user_id}", response_model=UserRead)
 def get_user(user_id: int, session: Session = Depends(get_session)):
     user = session.get(User, user_id)
     if not user:
