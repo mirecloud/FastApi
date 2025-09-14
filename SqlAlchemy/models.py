@@ -16,4 +16,13 @@ class PostRead(SQLModel):
     content: str
     published: bool
 
+class User(SQLModel, table=True):
+
+    __tablename__ = "Users"
+
+    id: int | None = Field(default=None, primary_key=True)
+    email: str = Field(index=True, unique=True)
+    password: str
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)       
+
  
