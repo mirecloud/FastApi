@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 from database import get_session
 from models import User
 from schemas import UserCreate, UserRead
+import utils
 
 router = APIRouter(
     prefix="/users",
@@ -13,14 +14,11 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},  
 )
 
-from passlib.context import CryptContext
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @router.post("/create_users/", response_model=UserRead, status_code=201)
 def create_users(user: UserCreate, session: Session = Depends(get_session)):
-    user.password = pwd_context.hash(user.password)
+    user.password = utils.pwd_context.hash(user.password)
     try:
         user = User(**user.dict())
         session.add(user)
