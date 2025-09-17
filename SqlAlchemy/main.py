@@ -6,7 +6,7 @@ from database import get_session, init_db, engine
 from models import Post, User
 from schemas import PostRead, UserCreate, UserRead
 from sqlalchemy.exc import IntegrityError
-from routers import post, user
+from routers import post, user, auth
 
 app = FastAPI()
 
@@ -16,8 +16,9 @@ def on_startup():
 
 app.include_router(post.router)
 app.include_router(user.router) 
+app.include_router(auth.router)
+
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the FastAPI application!"}   
-
-
+    return {"message": "Welcome to the FastAPI application!"}
+    
