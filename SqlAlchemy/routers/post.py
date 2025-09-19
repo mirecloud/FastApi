@@ -7,7 +7,7 @@ from sqlmodel import Session
 from database import get_session
 from models import Post, User
 from schemas import PostRead
-
+import auth2 as   auth
 
 router = APIRouter(
     prefix="/posts",
@@ -16,27 +16,28 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=Post, status_code=201)
-def create_post(post: Post, session: Session = Depends(get_session)):
+def create_post(post: Post, session: Session = Depends(get_session), current_user: User = Depends(auth.get_current_user)):
+    post.owner_id = current_user.id     
     session.add(post)
     session.commit()
     session.refresh(post)
     return post
 
 @router.get("/", response_model=List[PostRead], status_code=200)
-def get_posts(session: Session = Depends(get_session)):
+def get_posts(session: Session = Depends(get_session), current_user: User = Depends(auth.get_current_user)):
     #posts = session.exec(select(PostRead)).all()
     posts = session.exec(select(Post)).all()
     return posts
 
 @router.get("/{post_id}", response_model=Post)
-def get_post(post_id: int, session: Session = Depends(get_session)):
+def get_post(post_id: int, session: Session = Depends(get_session), current_user: User = Depends(auth.get_current_user)):
     post = session.get(Post, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return post
 
 @router.delete("/{post_id}", status_code=204)
-def delete_post(post_id: int, session: Session = Depends(get_session)):
+def delete_post(post_id: int, session: Session = Depends(get_session), current_user: User = Depends(auth.get_current_user)):
     post = session.get(Post, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
