@@ -8,6 +8,9 @@ from database import get_session
 from models import Post, User
 from schemas import PostRead , PostCreate
 import auth2 as   auth
+from sqlalchemy import func, select
+from sqlalchemy.orm import column_property
+from models import Vote
 
 router = APIRouter(
     prefix="/posts",
@@ -15,19 +18,34 @@ router = APIRouter(
     responses={404: {"description": "Not found"}}  
 )
 
-@router.post("/", response_model=PostRead, status_code=201)
-def create_post(
-    post_in: PostCreate,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(auth.get_current_user),
-):
-    # Build the Post directly from input + owner_id
-    post = Post(**post_in.model_dump(), owner_id=current_user.id)
+@router.get("/", response_model=List[PostRead])
+def get_posts(session: Session = Depends(get_session)):
+    query = (
+        session.query(
+            Post,
+            func.count(Vote.post_id).label("votes")
+        )
+        .outerjoin(Vote, Vote.post_id == Post.id)
+        .group_by(Post.id)
+    )
 
-    session.add(post)
-    session.commit()
-    session.refresh(post)
-    return post
+    results = query.all()
+
+    posts = [
+        PostRead(
+            id=post.id,
+            title=post.title,
+            content=post.content,
+            published=post.published,
+            created_at=post.created_at,
+            owner_id=post.owner_id,
+            owner=post.owner,
+            votes=votes,
+        )
+        for post, votes in results
+    ]
+
+    return posts
 
 
 

@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional, List
 
  
 class PostCreate(SQLModel):
@@ -16,7 +17,7 @@ class PostRead(SQLModel):
     created_at: datetime
     owner_id: int
     owner: "UserRead"  # Forward reference to UserRead
- 
+    votes: Optional[int] = 0  # To hold the count of votes
 
 class UserRead(SQLModel):
     email: str
