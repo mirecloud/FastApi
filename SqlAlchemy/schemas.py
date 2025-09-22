@@ -1,11 +1,22 @@
 from datetime import datetime
 from pydantic import EmailStr
-from sqlmodel import SQLModel 
+from sqlmodel import SQLModel, Field, Relationship
+
+ 
+class PostCreate(SQLModel):
+    title: str
+    content: str
+    published: bool = True
 
 class PostRead(SQLModel):
+    id: int
     title: str
     content: str
     published: bool
+    created_at: datetime
+    owner_id: int
+    owner: "UserRead"  # Forward reference to UserRead
+ 
 
 class UserRead(SQLModel):
     email: str
@@ -27,3 +38,12 @@ class Token(SQLModel):
 
 class TokenData(SQLModel):
     email: str | None = None    
+
+class Vote(SQLModel):   
+    post_id: int
+    dir: int    # 1 for upvote, 0 for remove vote
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    #user_id: int
+    # user_id will be set in the route based on the current authenticated user
+
+# Resolve forward references
