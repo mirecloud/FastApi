@@ -59,13 +59,34 @@ def get_posts(session: Session = Depends(get_session), current_user: User = Depe
     return posts
 
 @router.get("/{post_id}", response_model=PostRead)
-def get_post(post_id: int, session: Session = Depends(get_session), current_user: User = Depends(auth.get_current_user)):
+def get_post(
+    post_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(auth.get_current_user),
+):
+    # Vérifie si le post existe
     post = session.get(Post, post_id)
-    if current_user.id != post.owner_id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this post")
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    return post
+
+    # Vérifie si l'utilisateur est autorisé
+    if current_user.id != post.owner_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this post")
+
+    # Compte le nombre de votes pour ce post
+    votes_count = session.query(func.count(Vote.post_id)).filter(Vote.post_id == post.id).scalar()
+
+    # Retourne un PostRead enrichi
+    return PostRead(
+        id=post.id,
+        title=post.title,
+        content=post.content,
+        published=post.published,
+        created_at=post.created_at,
+        owner_id=post.owner_id,
+        owner=post.owner,
+        votes=votes_count,
+    )
 
 @router.delete("/{post_id}", status_code=204)
 def delete_post(post_id: int, session: Session = Depends(get_session), current_user: User = Depends(auth.get_current_user)):
